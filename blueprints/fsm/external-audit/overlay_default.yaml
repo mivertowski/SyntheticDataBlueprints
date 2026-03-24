@@ -1,0 +1,213 @@
+# Default FSM Overlay for Generic External Audit (ISA-based)
+# Controls generation parameters for the generic_fsa.yaml blueprint.
+# This overlay is non-proprietary and based entirely on public ISA standards.
+#
+# Use with DataSynth:
+#   audit_fsm:
+#     blueprint: builtin:fsa
+#     overlay: path/to/overlay_default.yaml
+
+schema_version: "1.0"
+overlay_for: generic_fsa
+
+metadata:
+  name: "Default External Audit Overlay"
+  version: "2025.1"
+  description: >
+    Generation parameters for a standard ISA-based financial statement audit
+    of a non-complex entity. Produces realistic audit event trails with
+    typical timings, probabilities, and workpaper volumes.
+
+# ── Engagement-level parameters ──────────────────────────────────────────
+
+engagement:
+  # Typical duration parameters (business days)
+  planning_duration_days: { min: 15, max: 30 }
+  execution_duration_days: { min: 40, max: 90 }
+  completion_duration_days: { min: 10, max: 25 }
+
+  # Team composition probabilities
+  team_size: { min: 3, max: 8 }
+  specialist_involvement_rate: 0.25  # % of engagements needing IT/tax/valuation specialist
+
+  # Engagement acceptance
+  new_client_rate: 0.15              # 15% are new clients
+  prior_year_reliance_rate: 0.80     # 80% leverage prior-year work
+
+# ── Materiality parameters ───────────────────────────────────────────────
+
+materiality:
+  # Benchmark selection probabilities
+  benchmark_distribution:
+    profit_before_tax: 0.50
+    total_revenue: 0.25
+    total_assets: 0.15
+    equity: 0.10
+  # Percentage applied to benchmark
+  percentage_range:
+    profit_before_tax: { min: 0.03, max: 0.07 }
+    total_revenue: { min: 0.005, max: 0.02 }
+    total_assets: { min: 0.005, max: 0.02 }
+    equity: { min: 0.02, max: 0.05 }
+  # Performance materiality as % of overall
+  performance_materiality_pct: { min: 0.50, max: 0.75 }
+  # Trivial threshold as % of overall
+  trivial_threshold_pct: { min: 0.03, max: 0.05 }
+
+# ── Risk assessment parameters ───────────────────────────────────────────
+
+risk_assessment:
+  # Significant risk identification
+  significant_risk_rate: 0.30        # 30% of assertions flagged as significant
+  fraud_risk_always_significant: true
+  revenue_recognition_presumed: true
+
+  # Risk of material misstatement distribution
+  risk_level_distribution:
+    high: 0.15
+    medium: 0.55
+    low: 0.30
+
+  # IT general controls
+  itgc_reliance_rate: 0.70           # 70% of engagements rely on ITGC
+
+# ── Controls testing parameters ──────────────────────────────────────────
+
+controls_testing:
+  # Whether to test controls (vs. purely substantive approach)
+  controls_reliance_rate: 0.65       # 65% adopt combined approach
+
+  # Sample sizes for controls testing (ISA 530 guidance)
+  sample_sizes:
+    daily_control: { min: 25, max: 40 }
+    weekly_control: { min: 5, max: 10 }
+    monthly_control: { min: 2, max: 3 }
+    quarterly_control: { min: 2, max: 2 }
+    annual_control: { min: 1, max: 1 }
+
+  # Deviation rates
+  expected_deviation_rate: 0.02      # 2% expected
+  tolerable_deviation_rate: 0.05     # 5% tolerable
+  deviation_found_rate: 0.08         # 8% chance of finding deviations
+
+  # Control deficiency classification
+  deficiency_classification:
+    significant_deficiency: 0.05     # 5% of tested controls
+    material_weakness: 0.01          # 1% of tested controls
+
+# ── Substantive testing parameters ───────────────────────────────────────
+
+substantive_testing:
+  # Sample size factors (multiplied by base sample)
+  sample_size_factor:
+    high_risk: 2.0
+    medium_risk: 1.0
+    low_risk: 0.5
+
+  # Tests of details coverage
+  coverage_by_assertion:
+    existence: 0.95
+    completeness: 0.90
+    valuation: 0.85
+    rights_obligations: 0.80
+    presentation: 0.75
+
+  # Misstatement discovery
+  misstatement_found_rate: 0.12      # 12% of samples find misstatements
+  misstatement_material_rate: 0.02   # 2% of misstatements are individually material
+
+  # Analytical procedures
+  analytical_procedures:
+    preliminary_always: true
+    substantive_rate: 0.60           # 60% of areas tested with analytics
+    final_always: true
+    expectation_precision: { min: 0.05, max: 0.15 }  # 5-15% threshold
+
+# ── Completion parameters ────────────────────────────────────────────────
+
+completion:
+  # Going concern
+  going_concern:
+    material_uncertainty_rate: 0.05  # 5% of engagements
+    close_call_rate: 0.10            # 10% require extended procedures
+
+  # Subsequent events
+  subsequent_events:
+    adjusting_event_rate: 0.08       # 8% discover adjusting events
+    non_adjusting_event_rate: 0.15   # 15% discover non-adjusting events
+
+  # Audit opinion distribution
+  opinion_distribution:
+    unmodified: 0.85
+    unmodified_with_emphasis: 0.08
+    qualified: 0.05
+    adverse: 0.01
+    disclaimer: 0.01
+
+  # Key audit matters (for listed entities)
+  key_audit_matters:
+    count: { min: 1, max: 4 }
+    common_topics:
+      - revenue_recognition
+      - goodwill_impairment
+      - expected_credit_losses
+      - fair_value_measurement
+      - going_concern
+      - tax_provisions
+      - inventory_valuation
+
+# ── Workpaper generation parameters ──────────────────────────────────────
+
+workpapers:
+  # Volume per procedure (pages equivalent)
+  volume_per_procedure:
+    accept_engagement: { min: 5, max: 15 }
+    planning_materiality: { min: 3, max: 8 }
+    risk_identification: { min: 15, max: 40 }
+    test_of_controls: { min: 20, max: 60 }
+    substantive_testing: { min: 30, max: 100 }
+    analytical_procedures: { min: 10, max: 30 }
+    going_concern: { min: 5, max: 20 }
+    subsequent_events: { min: 3, max: 10 }
+    form_opinion: { min: 10, max: 25 }
+
+  # Review cycle parameters
+  review_iterations: { min: 1, max: 3 }
+  review_note_rate: 0.30             # 30% of workpapers get review notes
+  review_note_resolution_days: { min: 1, max: 5 }
+
+# ── Timing & scheduling ─────────────────────────────────────────────────
+
+timing:
+  # Step duration distributions (business days)
+  step_duration:
+    evaluate: { min: 1, max: 5, distribution: log_normal }
+    determine: { min: 1, max: 3, distribution: normal }
+    understand: { min: 3, max: 10, distribution: log_normal }
+    identify: { min: 2, max: 7, distribution: normal }
+    assess: { min: 1, max: 5, distribution: normal }
+    design: { min: 2, max: 5, distribution: normal }
+    perform: { min: 3, max: 15, distribution: log_normal }
+    agree: { min: 1, max: 3, distribution: normal }
+    issue: { min: 1, max: 2, distribution: normal }
+
+  # Parallel execution
+  max_parallel_procedures: 3
+  parallel_execution_rate: 0.40      # 40% of eligible procedures run in parallel
+
+  # Calendar constraints
+  business_days_only: true
+  blackout_periods:
+    - name: "Year-end close"
+      month: 1
+      days: [1, 2, 3]
+
+# ── Anomaly injection ────────────────────────────────────────────────────
+
+anomalies:
+  # Procedural anomalies for training
+  skip_step_rate: 0.02               # 2% of steps skipped (control weakness)
+  out_of_order_rate: 0.03            # 3% of steps executed out of order
+  missing_evidence_rate: 0.04        # 4% of evidence artifacts missing
+  late_completion_rate: 0.10         # 10% of procedures completed late
+  reviewer_override_rate: 0.01       # 1% of rejections overridden

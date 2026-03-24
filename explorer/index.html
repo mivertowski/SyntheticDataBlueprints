@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SyntheticDataBlueprints Explorer</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- vis-network for graph visualization (CDN) -->
+  <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+  <!-- js-yaml for YAML parsing -->
+  <script src="https://unpkg.com/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <h1>SyntheticDataBlueprints</h1>
+      <p class="subtitle">FSM &amp; YAML Blueprint Explorer for DataSynth</p>
+    </div>
+    <div class="header-actions">
+      <button id="btn-export-all" title="Export current view">Export</button>
+      <select id="theme-toggle">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+      </select>
+    </div>
+  </header>
+
+  <nav id="sidebar">
+    <div class="nav-section">
+      <h3>FSM Blueprints</h3>
+      <ul id="nav-fsm"></ul>
+    </div>
+    <div class="nav-section">
+      <h3>Generation Profiles</h3>
+      <ul id="nav-profiles"></ul>
+    </div>
+    <div class="nav-section">
+      <h3>Scenarios</h3>
+      <ul id="nav-scenarios"></ul>
+    </div>
+    <div class="nav-section">
+      <h3>Regional Templates</h3>
+      <ul id="nav-regional"></ul>
+    </div>
+    <div class="nav-section">
+      <h3>Causal DAGs</h3>
+      <ul id="nav-causal"></ul>
+    </div>
+  </nav>
+
+  <main id="content">
+    <!-- Welcome / landing -->
+    <div id="welcome-panel" class="panel active">
+      <h2>Welcome to the Blueprint Explorer</h2>
+      <p>Browse and visualize curated FSM and YAML definitions for
+         <strong>DataSynth</strong>, the synthetic enterprise data generator.</p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-number" id="stat-fsm">0</span>
+          <span class="stat-label">FSM Blueprints</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="stat-profiles">0</span>
+          <span class="stat-label">Generation Profiles</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="stat-scenarios">0</span>
+          <span class="stat-label">Scenarios</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="stat-regional">0</span>
+          <span class="stat-label">Regional Templates</span>
+        </div>
+      </div>
+
+      <div class="onboarding">
+        <h3>Getting Started</h3>
+        <ol>
+          <li><strong>Browse</strong> &mdash; Select a blueprint from the sidebar to view its structure</li>
+          <li><strong>Visualize</strong> &mdash; FSM blueprints render as interactive state diagrams and procedure flow graphs</li>
+          <li><strong>Inspect</strong> &mdash; Click nodes to see procedure details, steps, standards references, and evidence</li>
+          <li><strong>Export</strong> &mdash; Download as YAML, JSON, or Mermaid diagram via the Export button</li>
+        </ol>
+        <h3>Blueprint Types</h3>
+        <dl>
+          <dt>FSM Blueprints</dt>
+          <dd>Finite State Machine definitions for audit methodologies (ISA, IIA-GIAS).
+              Each procedure is an event-sourced aggregate with states, transitions, commands, and guards.</dd>
+          <dt>Generation Profiles</dt>
+          <dd>Complete DataSynth YAML configurations for specific use cases:
+              fraud detection, ML training, process mining, audit engagement simulation.</dd>
+          <dt>Scenarios</dt>
+          <dd>Overlay configurations that inject specific conditions: supplier fraud schemes,
+              trading anomalies, control failures, going concern triggers.</dd>
+          <dt>Regional Templates</dt>
+          <dd>Country-specific naming data (vendors, customers, materials, line items)
+              for generating culturally authentic synthetic data.</dd>
+          <dt>Causal DAGs</dt>
+          <dd>Directed acyclic graphs modeling causal relationships between macro conditions,
+              operational parameters, and financial outcomes.</dd>
+        </dl>
+      </div>
+    </div>
+
+    <!-- FSM visualization panel -->
+    <div id="fsm-panel" class="panel">
+      <div class="panel-header">
+        <h2 id="fsm-title"></h2>
+        <div class="panel-actions">
+          <select id="fsm-view-mode">
+            <option value="procedure-flow">Procedure Flow</option>
+            <option value="state-diagram">State Diagrams</option>
+          </select>
+          <button id="btn-fsm-export">Export</button>
+        </div>
+      </div>
+      <div class="fsm-meta" id="fsm-meta"></div>
+      <div id="fsm-graph" class="graph-container"></div>
+      <div id="fsm-detail" class="detail-panel"></div>
+    </div>
+
+    <!-- YAML config viewer panel -->
+    <div id="config-panel" class="panel">
+      <div class="panel-header">
+        <h2 id="config-title"></h2>
+        <div class="panel-actions">
+          <button id="btn-config-export">Export</button>
+        </div>
+      </div>
+      <div id="config-summary" class="config-summary"></div>
+      <div id="config-tree" class="config-tree"></div>
+    </div>
+
+    <!-- Causal DAG panel -->
+    <div id="dag-panel" class="panel">
+      <div class="panel-header">
+        <h2 id="dag-title"></h2>
+        <div class="panel-actions">
+          <button id="btn-dag-export">Export</button>
+        </div>
+      </div>
+      <div id="dag-graph" class="graph-container"></div>
+      <div id="dag-detail" class="detail-panel"></div>
+    </div>
+
+    <!-- Export modal -->
+    <div id="export-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Export Blueprint</h3>
+          <button class="modal-close" id="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="export-options">
+            <button class="export-btn" data-format="yaml">YAML</button>
+            <button class="export-btn" data-format="json">JSON</button>
+            <button class="export-btn" data-format="mermaid">Mermaid Diagram</button>
+          </div>
+          <pre id="export-preview" class="export-preview"></pre>
+          <div class="modal-footer">
+            <button id="btn-copy-export">Copy to Clipboard</button>
+            <button id="btn-download-export">Download File</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/graph-utils.js"></script>
+  <script src="js/fsm-visualizer.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
